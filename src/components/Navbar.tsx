@@ -4,9 +4,10 @@ import Link from "next/link"
 import { SignOutButton } from "@clerk/nextjs"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { currentUser } from "@clerk/nextjs/server"
 
-const Navbar = () => {
-  const user = false
+const Navbar = async () => {
+  const user = await currentUser()
   return (
     <nav className="sticky z-[100] h-16 inset-x-0 top-0 w-full border-b border-gray-200 bg-white/80 backdrop-blur-lg transition-all">
       <MaxWidthWrapper>
@@ -45,7 +46,7 @@ const Navbar = () => {
                   Pricing
                 </Link>
                 <Link
-                  href={"/"}
+                  href={"/sign-in"}
                   className={buttonVariants({
                     size: "sm",
                     className: "flex items-center gap-1",
@@ -56,7 +57,7 @@ const Navbar = () => {
                 </Link>
                 <div className="h-8 w-px bg-gray-100" />
                 <Link
-                  href={"/"}
+                  href={"/sign-up"}
                   className={buttonVariants({
                     size: "sm",
                     className: "flex items-center gap-1.5",
