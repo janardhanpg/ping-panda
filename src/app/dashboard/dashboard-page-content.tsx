@@ -9,6 +9,7 @@ import { format, formatDistanceToNow } from "date-fns"
 import { ArrowRight, BarChart2, Clock, Database, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import DashboardEmptyState from "./dashboard-empty-state"
 
 const DashboardPageContent = () => {
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null)
@@ -43,7 +44,7 @@ const DashboardPageContent = () => {
     )
   }
   if (!categories || categories.length === 0) {
-    return <div>empty State</div>
+    return <DashboardEmptyState />
   }
   return (
     <>
@@ -99,7 +100,7 @@ const DashboardPageContent = () => {
               </div>
               <div className="flex ityems-center justify-between mt-4">
                 <Link
-                  href={`/dahboard/category/${category.name}`}
+                  href={`/dashboard/category/${category.name}`}
                   className={buttonVariants({
                     variant: "outline",
                     size: "sm",
