@@ -4,11 +4,17 @@ import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import React from "react"
 import DashboardPageContent from "./dashboard-page-content"
-import {CreateEventCategoryModal} from "@/components/create-event-category-modal"
+import { CreateEventCategoryModal } from "@/components/create-event-category-modal"
 import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
-
-const Page = async () => {
+import { createCheckoutSession } from "@/lib/stripe"
+import PaymentSuccessModal from "@/components/PaymentSuccessModal"
+interface PageProps {
+  searchParams: {
+    [key: string]: string | string[] | undefined
+  }
+}
+const Page = async ({ searchParams }: PageProps) => {
   const auth = await currentUser()
   if (!auth) {
     redirect("/sign-in")
@@ -19,7 +25,18 @@ const Page = async () => {
   if (!user) {
     redirect("/sign-in")
   }
+  const intent = searchParams.intent
+
+  if (intent === "upgrade") {
+    const session = await createCheckoutSession({
+      userEmail: user.email,
+      userId: user.id,
+    })
+    if (session.url) redirect(session.url)
+  }
+  const success = searchParams.success
   return (
+    <>{success? <PaymentSuccessModal/>:null}
     <DashboardPage
       cta={
         <CreateEventCategoryModal>
@@ -32,6 +49,7 @@ const Page = async () => {
     >
       <DashboardPageContent />
     </DashboardPage>
+    </>
   )
 }
 

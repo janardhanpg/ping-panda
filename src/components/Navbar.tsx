@@ -36,7 +36,7 @@ const Navbar = async () => {
             ) : (
               <>
                 <Link
-                  href={"/"}
+                  href={"/pricing"}
                   className={buttonVariants({
                     size: "sm",
                     className: "flex items-center gap-1",
