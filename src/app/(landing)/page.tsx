@@ -16,6 +16,8 @@ const features = [
   "Track sales, new users, or any other event",
 ]
 
+export const runtime = "edge"
+
 const page = () => {
   const codeSnippet = `await fetch("http://localhost:3000/api/v1/events", {
   method: "POST",

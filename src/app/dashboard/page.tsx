@@ -14,6 +14,8 @@ interface PageProps {
     [key: string]: string | string[] | undefined
   }>
 }
+export const runtime = "edge"
+
 const Page = async ({ searchParams }: PageProps) => {
   const auth = await currentUser()
   if (!auth) {

@@ -10,6 +10,8 @@ import { LucideProps } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
+export const runtime = "edge"
+
 const Page = () => {
   const router = useRouter()
 
