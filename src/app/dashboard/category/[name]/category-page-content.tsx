@@ -6,8 +6,8 @@ import { client } from "@/lib/client"
 import { EventCategory, Event } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowUpDown, BarChart } from "lucide-react"
-import { useSearchParams } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import EmptyCategoryState from "./empty-category-state"
 import { isAfter, isToday, startOfMonth, startOfWeek } from "date-fns"
 import {
@@ -58,10 +58,6 @@ const CategoryPageContent = ({
     queryKey: ["category", category.name, "hasEvents"],
     initialData: { hasEvents: initialHasEvents },
   })
-  if (!pollingData.hasEvents)
-    return (
-      <EmptyCategoryState categoryName={category.name}></EmptyCategoryState>
-    )
 
   const { data, isFetching } = useQuery({
     queryKey: [
@@ -163,12 +159,26 @@ const CategoryPageContent = ({
     },
   })
 
+  const router = useRouter()
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    searchParams.set("page", (pagination.pageIndex + 1).toString())
+    searchParams.set("limit", pagination.pageSize.toString())
+    router.push(`?${searchParams.toString()}`, { scroll: false })
+  }, [pagination, router])
+
   const numericFieldSums = useMemo(() => {
     if (!data?.events || data.events.length === 0) return {}
 
     const sums: Record<
       string,
-      { total: number; thisWeek: number; thisMonth: number; today: number }
+      {
+        total: number
+        thisWeek: number
+        thisMonth: number
+        today: number
+      }
     > = {}
 
     const now = new Date()
@@ -239,7 +249,129 @@ const CategoryPageContent = ({
       )
     })
   }
+  if (!pollingData.hasEvents)
+    return (
+      <EmptyCategoryState categoryName={category.name}></EmptyCategoryState>
+    )
   return (
+    // <div className="space-y-6">
+    //   <Tabs
+    //     value={activeTab}
+    //     onValueChange={(value) => {
+    //       setActiveTab(value as "today" | "week" | "month")
+    //     }}
+    //   >
+    //     <TabsList className="mb-2">
+    //       <TabsTrigger value="today">Today</TabsTrigger>
+    //       <TabsTrigger value="week">This Week</TabsTrigger>
+    //       <TabsTrigger value="month">This Month</TabsTrigger>
+    //     </TabsList>
+    //     <TabsContent value={activeTab}>
+    //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+    //         <Card className="border-2 border-brand-700">
+    //           <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+    //             <p className="text-sm/6 font-medium">Total Events</p>
+    //             <BarChart className="size-4 text-muted-foreground" />
+    //           </div>
+    //           <div>
+    //             <p className="text-2xl font-bold">{data?.eventsCount || 0}</p>
+    //             <p className="text-xs/5 text-muted-foreground">
+    //               Events{" "}
+    //               {activeTab === "today"
+    //                 ? "today"
+    //                 : activeTab === "week"
+    //                 ? "this week"
+    //                 : "this month"}
+    //             </p>
+    //           </div>
+    //         </Card>
+    //         <NumericFieldSumCards />
+    //       </div>
+    //     </TabsContent>
+    //   </Tabs>
+
+    //   <div className="flex flex-col gap-4">
+    //     <div className="flex items-center justify-between">
+    //       <div className="w-full flex flex-col gap-4">
+    //         <Heading className="text-3xl">Event Overview</Heading>
+    //       </div>
+    //     </div>
+    //     <Card contentClassName="px-6 py-4">
+    //       <Table>
+    //         <TableHeader>
+    //           {table.getHeaderGroups().map((headerGroup) => (
+    //             <TableRow key={headerGroup.id}>
+    //               {headerGroup.headers.map((header) => (
+    //                 <TableHead key={header.id}>
+    //                   {header.isPlaceholder
+    //                     ? null
+    //                     : flexRender(
+    //                         header.column.columnDef.header,
+    //                         header.getContext()
+    //                       )}
+    //                 </TableHead>
+    //               ))}
+    //             </TableRow>
+    //           ))}
+    //         </TableHeader>
+    //         <TableBody>
+    //           {isFetching ? (
+    //             [...Array(5)].map((_, rowIndex) => (
+    //               <TableRow key={rowIndex}>
+    //                 {columns.map((_, cellIndex) => (
+    //                   <TableCell key={cellIndex}>
+    //                     <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
+    //                   </TableCell>
+    //                 ))}
+    //               </TableRow>
+    //             ))
+    //           ) : table.getRowModel().rows.length ? (
+    //             table.getRowModel().rows.map((row) => (
+    //               <TableRow key={row.id}>
+    //                 {row.getVisibleCells().map((cell) => (
+    //                   <TableCell key={cell.id}>
+    //                     {flexRender(
+    //                       cell.column.columnDef.cell,
+    //                       cell.getContext()
+    //                     )}
+    //                   </TableCell>
+    //                 ))}
+    //               </TableRow>
+    //             ))
+    //           ) : (
+    //             <TableRow>
+    //               <TableCell
+    //                 colSpan={columns.length}
+    //                 className="h-24 text-center"
+    //               >
+    //                 No results.{" "}
+    //               </TableCell>
+    //             </TableRow>
+    //           )}
+    //         </TableBody>
+    //       </Table>
+    //     </Card>
+    //   </div>
+    //   <div className="flex items-center justify-end space-x-2 py-4 ">
+    //     <Button
+    //       variant={"outline"}
+    //       size="sm"
+    //       onClick={() => table.previousPage()}
+    //       disabled={!table.getCanPreviousPage() || isFetching}
+    //     >
+    //       Previous
+    //     </Button>
+    //     <Button
+    //       variant={"outline"}
+    //       size="sm"
+    //       onClick={() => table.nextPage()}
+    //       disabled={!table.getCanNextPage() || isFetching}
+    //     >
+    //       Next
+    //     </Button>
+    //   </div>
+    // </div>
+
     <div className="space-y-6">
       <Tabs
         value={activeTab}
@@ -252,6 +384,7 @@ const CategoryPageContent = ({
           <TabsTrigger value="week">This Week</TabsTrigger>
           <TabsTrigger value="month">This Month</TabsTrigger>
         </TabsList>
+
         <TabsContent value={activeTab}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
             <Card className="border-2 border-brand-700">
@@ -259,6 +392,7 @@ const CategoryPageContent = ({
                 <p className="text-sm/6 font-medium">Total Events</p>
                 <BarChart className="size-4 text-muted-foreground" />
               </div>
+
               <div>
                 <p className="text-2xl font-bold">{data?.eventsCount || 0}</p>
                 <p className="text-xs/5 text-muted-foreground">
@@ -271,6 +405,7 @@ const CategoryPageContent = ({
                 </p>
               </div>
             </Card>
+
             <NumericFieldSumCards />
           </div>
         </TabsContent>
@@ -279,9 +414,10 @@ const CategoryPageContent = ({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="w-full flex flex-col gap-4">
-            <Heading className="text-3xl">Event Overview</Heading>
+            <Heading className="text-3xl">Event overview</Heading>
           </div>
         </div>
+
         <Card contentClassName="px-6 py-4">
           <Table>
             <TableHeader>
@@ -300,6 +436,7 @@ const CategoryPageContent = ({
                 </TableRow>
               ))}
             </TableHeader>
+
             <TableBody>
               {isFetching ? (
                 [...Array(5)].map((_, rowIndex) => (
@@ -330,7 +467,7 @@ const CategoryPageContent = ({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.{" "}
+                    No results.
                   </TableCell>
                 </TableRow>
               )}
@@ -338,9 +475,10 @@ const CategoryPageContent = ({
           </Table>
         </Card>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4 ">
+
+      <div className="flex items-center justify-end space-x-2 py-4">
         <Button
-          variant={"outline"}
+          variant="outline"
           size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage() || isFetching}
@@ -348,7 +486,7 @@ const CategoryPageContent = ({
           Previous
         </Button>
         <Button
-          variant={"outline"}
+          variant="outline"
           size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage() || isFetching}

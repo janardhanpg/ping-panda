@@ -9,7 +9,7 @@ const DashboardEmptyState = () => {
   const queryClient = useQueryClient()
   const { mutate: insertQuickStartcategories, isPending } = useMutation({
     mutationFn: async () => {
-      await client.category.insertQuickStartcategory.$post()
+      await client.category.insertQuickstartCategories.$post()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-event-categories"] })
